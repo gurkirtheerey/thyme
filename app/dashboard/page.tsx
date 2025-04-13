@@ -1,18 +1,17 @@
+import DashboardContent from "./dashboard-content";
 import { auth } from "@/lib/auth";
-import LoginForm from "./login-form";
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 const Page = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  if (session) {
-    redirect("/dashboard");
+  if (!session) {
+    redirect("/login");
   }
-
   return (
     <div>
-      <LoginForm />
+      <DashboardContent />
     </div>
   );
 };
