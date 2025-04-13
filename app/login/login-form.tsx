@@ -1,12 +1,38 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 const LoginForm = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const handleLogin = () => {
-    console.log(email, password);
+
+  const handleLogin = async () => {
+    try {
+      const { data, error } = await authClient.signIn.email({
+        email,
+        password,
+      });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      console.log(data);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
+      toast.error(
+        `Login failed: ${
+          error instanceof Error ? error.message : "An unknown error occurred"
+        }`
+      );
+    }
   };
+
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mt-10">
       <h1 className="text-2xl font-bold">Login</h1>
