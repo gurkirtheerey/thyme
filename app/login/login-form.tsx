@@ -4,6 +4,10 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+
 const LoginForm = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -11,7 +15,7 @@ const LoginForm = () => {
 
   const handleLogin = async () => {
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email,
         password,
       });
@@ -19,7 +23,6 @@ const LoginForm = () => {
         toast.error(error.message);
         return;
       }
-      console.log(data);
       router.push("/dashboard");
     } catch (error) {
       console.error(
@@ -35,10 +38,10 @@ const LoginForm = () => {
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-bold">Login</h1>
+      <h1 className="text-2xl font-bold text-center">Login</h1>
       <div className="flex flex-col gap-2">
-        <label htmlFor="email">Email</label>
-        <input
+        <Label htmlFor="email">Email</Label>
+        <Input
           className="border border-gray-300 rounded-md p-2"
           type="text"
           value={email}
@@ -46,20 +49,15 @@ const LoginForm = () => {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="password">Password</label>
-        <input
+        <Label htmlFor="password">Password</Label>
+        <Input
           className="border border-gray-300 rounded-md p-2"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      <button
-        className="bg-blue-500 text-white rounded-md p-2 cursor-pointer hover:bg-blue-600"
-        onClick={handleLogin}
-      >
-        Login
-      </button>
+      <Button onClick={handleLogin}>Login</Button>
       <p className="text-sm text-gray-500">
         Don&apos;t have an account? <Link href="/signup">Signup</Link>
       </p>

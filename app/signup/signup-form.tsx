@@ -4,7 +4,9 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
-
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 const SignupForm = () => {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
@@ -40,21 +42,21 @@ const SignupForm = () => {
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-bold">Signup</h1>
+      <h1 className="text-2xl font-bold text-center">Signup</h1>
       <div className="flex flex-col gap-2">
-        <div className="flex justify-between gap-2">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="name">First Name</label>
-            <input
+        <div className="flex gap-2">
+          <div className="flex flex-col gap-2 w-full">
+            <Label htmlFor="name">First Name</Label>
+            <Input
               className="border border-gray-300 rounded-md p-2 w-full"
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="last-name">Last Name</label>
-            <input
+          <div className="flex flex-col gap-2 w-full">
+            <Label htmlFor="last-name">Last Name</Label>
+            <Input
               className="border border-gray-300 rounded-md p-2 w-full"
               type="text"
               value={lastName}
@@ -63,8 +65,8 @@ const SignupForm = () => {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="email">Email</label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             className="border border-gray-300 rounded-md p-2"
             type="text"
             value={email}
@@ -72,8 +74,8 @@ const SignupForm = () => {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="password">Password</label>
-          <input
+          <Label htmlFor="password">Password</Label>
+          <Input
             className="border border-gray-300 rounded-md p-2"
             type="password"
             value={password}
@@ -81,12 +83,7 @@ const SignupForm = () => {
           />
         </div>
       </div>
-      <button
-        className="bg-blue-500 text-white rounded-md p-2 cursor-pointer hover:bg-blue-600"
-        onClick={handleSignup}
-      >
-        Signup
-      </button>
+      <Button onClick={handleSignup}>Signup</Button>
       <p className="text-sm text-gray-500">
         Already have an account? <Link href="/login">Login</Link>
       </p>
