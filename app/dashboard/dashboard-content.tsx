@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { User, Business } from "@/types";
 import { BusinessDialog } from "./components/BusinessDialog/BusinessDialog";
+import { DashboardSkeleton } from "./components/DashboardSkeleton";
+
 const DashboardContent = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
@@ -32,7 +34,7 @@ const DashboardContent = () => {
   };
 
   if (isLoading || sessionLoading) {
-    return <div>Loading...</div>;
+    return <DashboardSkeleton />;
   }
 
   if (!data) {
