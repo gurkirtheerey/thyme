@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { businesses } from "@/db/schema";
-import { Business } from "@/types/Business";
+import { Business } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 /**

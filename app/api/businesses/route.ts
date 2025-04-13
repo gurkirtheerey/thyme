@@ -3,7 +3,7 @@ import { businesses } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Business } from "@/types/Business";
+import { Business } from "@/db/schema";
 
 /**
  * Creates a new business

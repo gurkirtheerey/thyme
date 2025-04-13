@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { User, Business } from "@/types";
+import { User, Business } from "@/db/schema";
 import { BusinessDialog } from "./components/BusinessDialog/BusinessDialog";
 import { DashboardSkeleton } from "./components/DashboardSkeleton";
 
