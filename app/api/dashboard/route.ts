@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Business } from "@/types/Business";
+import { Business, User } from "@/db/schema";
 
 /**
  * Get user and their data based on role
@@ -19,7 +19,7 @@ export async function GET() {
   }
   const userId = userSession.user.id;
 
-  const user_response = await db
+  const user_response: User[] = await db
     .select()
     .from(userTable)
     .where(eq(userTable.id, userId));
@@ -28,7 +28,13 @@ export async function GET() {
 
   if (user.role === "client") {
     // call client api
-    return NextResponse.json({ user });
+    const businesses_response: Business[] = await db
+      .select()
+      .from(businessesTable);
+
+    const businesses = businesses_response;
+
+    return NextResponse.json({ user, businesses });
   } else {
     // call business api
     const business_response: Business[] = await db
