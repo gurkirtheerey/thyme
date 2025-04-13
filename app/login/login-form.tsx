@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -9,19 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
+import { LoginFormData, loginSchema } from "@/schema/loginSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const LoginForm = () => {
   const router = useRouter();
   const { register, handleSubmit } = useForm<LoginFormData>({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    resolver: zodResolver(loginSchema),
   });
 
   const handleLogin = useMutation({

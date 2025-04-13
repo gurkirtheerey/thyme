@@ -1,25 +1,51 @@
 import { db } from "@/db";
-import { businesses } from "@/db/schema";
+import { businesses as businessesTable, user as userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Business } from "@/types/Business";
+
+/**
+ * Get user and their data based on role
+ * @returns User and their data - User
+ */
 export async function GET() {
-  const user = await auth.api.getSession({
+  const userSession = await auth.api.getSession({
     headers: await headers(),
   });
-  if (!user) {
+  if (!userSession) {
     return new Response("Unauthorized", { status: 401 });
   }
-  const userBusinesses: Business[] = await db
-    .select()
-    .from(businesses)
-    .where(eq(businesses.userId, user.user.id));
+  const userId = userSession.user.id;
 
-  return NextResponse.json(userBusinesses);
+  const user_response = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.id, userId));
+
+  const user = user_response[0];
+
+  if (user.role === "client") {
+    // call client api
+    return NextResponse.json({ user });
+  } else {
+    // call business api
+    const business_response: Business[] = await db
+      .select()
+      .from(businessesTable)
+      .where(eq(businessesTable.userId, userId));
+
+    const business = business_response[0];
+
+    return NextResponse.json({ user, business });
+  }
 }
 
+/**
+ * Create a new business
+ * @returns New business - Business
+ */
 export async function POST() {
   const user = await auth.api.getSession({
     headers: await headers(),
@@ -39,7 +65,7 @@ export async function POST() {
     updatedAt: new Date(),
   };
 
-  await db.insert(businesses).values(newBusiness);
+  await db.insert(businessesTable).values(newBusiness);
 
-  return new Response("Business created", { status: 200 });
+  return NextResponse.json(newBusiness);
 }
