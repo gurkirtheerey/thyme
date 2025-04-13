@@ -1,8 +1,10 @@
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import { businesses, services } from "@/db/schema";
-import { MapPin, Phone, Globe, Clock } from "lucide-react";
+import { MapPin, Phone, Globe, Clock, ArrowLeft } from "lucide-react";
 import Error from "./error";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
   params: {
@@ -11,7 +13,7 @@ interface PageProps {
 }
 
 const Page = async ({ params }: PageProps) => {
-  const { id } = params;
+  const { id } = await params;
   const business = await db.query.businesses.findFirst({
     where: eq(businesses.id, id),
   });
@@ -28,16 +30,24 @@ const Page = async ({ params }: PageProps) => {
     <div className="container mx-auto p-4 space-y-8">
       {/* Header Section */}
       <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-xl font-semibold text-primary">
-              {business.name.charAt(0)}
-            </span>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-xl font-semibold text-primary">
+                {business.name.charAt(0)}
+              </span>
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold">{business.name}</h1>
+              <p className="text-muted-foreground">Business Profile</p>
+            </div>
           </div>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold">{business.name}</h1>
-            <p className="text-muted-foreground">Business Profile</p>
-          </div>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
         </div>
       </div>
 
