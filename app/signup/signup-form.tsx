@@ -7,19 +7,31 @@ import Link from "next/link";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+
+interface SignupFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
 const SignupForm = () => {
   const router = useRouter();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSignup = async () => {
-    try {
+  const { register, handleSubmit } = useForm<SignupFormData>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
+  });
+  const handleSignup = useMutation({
+    mutationFn: async (data: SignupFormData) => {
       const { error } = await authClient.signUp.email({
-        email,
-        password,
-        name: `${firstName} ${lastName}`,
+        email: data.email,
+        password: data.password,
+        name: `${data.firstName} ${data.lastName}`,
         image: "",
         callbackURL: "/dashboard",
       });
@@ -28,20 +40,18 @@ const SignupForm = () => {
         return;
       }
       router.push("/dashboard");
-    } catch (error) {
-      console.error(
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
-      toast.error(
-        `Signup failed: ${
-          error instanceof Error ? error.message : "An unknown error occurred"
-        }`
-      );
-    }
+    },
+  });
+
+  const onSubmit = (data: SignupFormData) => {
+    handleSignup.mutate(data);
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-md mx-auto mt-10">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-4 w-full max-w-md mx-auto mt-10"
+    >
       <h1 className="text-2xl font-bold text-center">Signup</h1>
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
@@ -50,8 +60,8 @@ const SignupForm = () => {
             <Input
               className="border border-gray-300 rounded-md p-2 w-full"
               type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              {...register("firstName", { required: true })}
+              disabled={handleSignup.isPending}
             />
           </div>
           <div className="flex flex-col gap-2 w-full">
@@ -59,8 +69,8 @@ const SignupForm = () => {
             <Input
               className="border border-gray-300 rounded-md p-2 w-full"
               type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              {...register("lastName", { required: true })}
+              disabled={handleSignup.isPending}
             />
           </div>
         </div>
@@ -69,8 +79,8 @@ const SignupForm = () => {
           <Input
             className="border border-gray-300 rounded-md p-2"
             type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            {...register("email", { required: true })}
+            disabled={handleSignup.isPending}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -78,16 +88,18 @@ const SignupForm = () => {
           <Input
             className="border border-gray-300 rounded-md p-2"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            {...register("password", { required: true })}
+            disabled={handleSignup.isPending}
           />
         </div>
       </div>
-      <Button onClick={handleSignup}>Signup</Button>
+      <Button type="submit" disabled={handleSignup.isPending}>
+        {handleSignup.isPending ? "Signing up..." : "Signup"}
+      </Button>
       <p className="text-sm text-gray-500">
         Already have an account? <Link href="/login">Login</Link>
       </p>
-    </div>
+    </form>
   );
 };
 

@@ -7,45 +7,54 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 const LoginForm = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { register, handleSubmit } = useForm<LoginFormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleLogin = async () => {
-    try {
+  const handleLogin = useMutation({
+    mutationFn: async (data: LoginFormData) => {
       const { error } = await authClient.signIn.email({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       });
       if (error) {
         toast.error(error.message);
         return;
       }
       router.push("/dashboard");
-    } catch (error) {
-      console.error(
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
-      toast.error(
-        `Login failed: ${
-          error instanceof Error ? error.message : "An unknown error occurred"
-        }`
-      );
-    }
+    },
+  });
+
+  const onSubmit = (data: LoginFormData) => {
+    handleLogin.mutate(data);
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-md mx-auto mt-10">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-4 w-full max-w-md mx-auto mt-10"
+    >
       <h1 className="text-2xl font-bold text-center">Login</h1>
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
+          {...register("email", { required: true })}
           className="border border-gray-300 rounded-md p-2"
           type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          disabled={handleLogin.isPending}
         />
       </div>
       <div className="flex flex-col gap-2">
@@ -53,15 +62,17 @@ const LoginForm = () => {
         <Input
           className="border border-gray-300 rounded-md p-2"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          {...register("password", { required: true })}
+          disabled={handleLogin.isPending}
         />
       </div>
-      <Button onClick={handleLogin}>Login</Button>
+      <Button type="submit" disabled={handleLogin.isPending}>
+        {handleLogin.isPending ? "Logging in..." : "Login"}
+      </Button>
       <p className="text-sm text-gray-500">
         Don&apos;t have an account? <Link href="/signup">Signup</Link>
       </p>
-    </div>
+    </form>
   );
 };
 
