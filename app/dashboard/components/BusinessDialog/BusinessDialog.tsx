@@ -1,7 +1,7 @@
 import { authClient } from "@/lib/auth-client";
-import { Business } from "@/types/Business";
+import { Business, ServiceCatalog } from "@/db/schema";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Button,
@@ -15,7 +15,14 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+  SelectContent,
+  Form,
 } from "@/components/ui";
+import { FormControl, FormField } from "@/components/ui/form";
 
 export function BusinessDialog({
   business,
@@ -26,22 +33,39 @@ export function BusinessDialog({
   dialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
 }) {
+  const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
+
+  const form = useForm<Business>({
+    defaultValues: business,
+  });
+
+  const { data: services } = useQuery({
+    queryKey: ["services"],
+    queryFn: async () => {
+      const response = await fetch("/api/services");
+      return response.json();
+    },
+  });
 
   if (!session) {
     return null;
   }
 
-  const methods = useForm<Business>({
-    defaultValues: business,
-  });
-
-  const queryClient = useQueryClient();
   const handleCreateBusiness = useMutation({
     mutationFn: async (data: Business) => {
-      await fetch("/api/businesses", {
+      const businessResponse = await fetch("/api/businesses", {
         method: "POST",
         body: JSON.stringify(data),
+      });
+      const businessData = await businessResponse.json();
+      console.log(businessData);
+      await fetch("/api/services", {
+        method: "POST",
+        body: JSON.stringify({
+          businessId: businessData.id,
+          serviceCatalogId: data.serviceCatalogId,
+        }),
       });
       setDialogOpen(false);
       toast.success("Business created successfully");
@@ -52,12 +76,20 @@ export function BusinessDialog({
       });
     },
   });
+
   const handleUpdateBusiness = useMutation({
     mutationFn: async (data: Business) => {
       await fetch(`/api/businesses/${business.id}`, {
         method: "PUT",
         body: JSON.stringify(data),
       });
+      // await fetch(`/api/services/${business.id}`, {
+      //   method: "PUT",
+      //   body: JSON.stringify({
+      //     businessId: data.id,
+      //     catalogId: data.serviceCatalogId,
+      //   }),
+      // });
       setDialogOpen(false);
       toast.success("Business updated successfully");
     },
@@ -97,41 +129,69 @@ export function BusinessDialog({
               : "Create a new business."}
           </DialogDescription>
         </DialogHeader>
-        <form
-          className="flex-col items-center"
-          onSubmit={methods.handleSubmit(onSubmit)}
-        >
-          <div className="flex flex-col gap-2 mb-4">
-            <Label htmlFor="name">Name</Label>
-            <Input {...methods.register("name")} disabled={loading} />
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <Label htmlFor="description">Description</Label>
-            <Input {...methods.register("description")} disabled={loading} />
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <Label htmlFor="address">Address</Label>
-            <Input {...methods.register("address")} disabled={loading} />
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <Label htmlFor="phone">Phone</Label>
-            <Input {...methods.register("phone")} disabled={loading} />
-          </div>
-          <div className="flex flex-col gap-2 mb-4">
-            <Label htmlFor="website">Website</Label>
-            <Input {...methods.register("website")} disabled={loading} />
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cancel
+        <Form {...form}>
+          <form
+            className="flex-col items-center"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <div className="flex flex-col gap-2 mb-4">
+              <Label htmlFor="name">Name</Label>
+              <Input {...form.register("name")} disabled={loading} />
+            </div>
+            <div className="flex flex-col gap-2 mb-4">
+              <Label htmlFor="description">Description</Label>
+              <Input {...form.register("description")} disabled={loading} />
+            </div>
+            <div className="flex flex-col gap-2 mb-4">
+              <Label htmlFor="address">Address</Label>
+              <Input {...form.register("address")} disabled={loading} />
+            </div>
+            <div className="flex flex-col gap-2 mb-4">
+              <Label htmlFor="phone">Phone</Label>
+              <Input {...form.register("phone")} disabled={loading} />
+            </div>
+            <div className="flex flex-col gap-2 mb-4">
+              <Label htmlFor="website">Website</Label>
+              <Input {...form.register("website")} disabled={loading} />
+            </div>
+            <div className="flex flex-col gap-2 mb-4">
+              <Label htmlFor="services">Services</Label>
+              <FormField
+                control={form.control}
+                name="serviceCatalogId"
+                render={({ field }) => (
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a service" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {services?.services.map((service: ServiceCatalog) => (
+                          <SelectItem key={service.id} value={service.id}>
+                            {service.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" variant="secondary" disabled={loading}>
+                {loading ? "Saving..." : "Save"}
               </Button>
-            </DialogClose>
-            <Button type="submit" variant="secondary" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </form>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

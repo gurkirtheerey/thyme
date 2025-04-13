@@ -1,0 +1,1 @@
+ALTER TABLE "businesses" ALTER COLUMN "service_catalog_id" DROP NOT NULL;

@@ -1,0 +1,2 @@
+ALTER TABLE "businesses" ADD COLUMN "service_catalog_id" uuid;--> statement-breakpoint
+ALTER TABLE "businesses" ADD CONSTRAINT "businesses_service_catalog_id_service_catalog_id_fk" FOREIGN KEY ("service_catalog_id") REFERENCES "public"."service_catalog"("id") ON DELETE cascade ON UPDATE no action;
