@@ -66,18 +66,12 @@ export async function POST(request: NextRequest) {
 
     // Check if there are any events that overlap with the new event's time range
     const overlappingEvents = await db.query.events.findMany({
-      where: (eventTable, { and, eq, or, gte, lte }) => {
+      where: (eventTable, { and, eq, or, gt, lt }) => {
         return and(
           eq(eventTable.businessId, businessId),
           or(
-            // New event starts during an existing event
-            and(gte(eventTable.start, start), lte(eventTable.start, end)),
-            // New event ends during an existing event
-            and(gte(eventTable.end, start), lte(eventTable.end, end)),
-            // New event completely contains an existing event
-            and(lte(eventTable.start, start), gte(eventTable.end, end)),
-            // New event is completely within an existing event
-            and(gte(eventTable.start, start), lte(eventTable.end, end))
+            // Event starts before new event ends AND ends after new event starts
+            and(lt(eventTable.start, end), gt(eventTable.end, start))
           )
         );
       },
