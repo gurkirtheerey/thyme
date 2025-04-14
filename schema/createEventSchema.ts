@@ -11,6 +11,7 @@ export const createEventSchema = z
     end: z.date(),
     notes: z.string().optional(),
     allDay: z.boolean().optional(),
+    clientId: z.string().min(1, "Client is required"),
   })
   .refine(
     (data) => {

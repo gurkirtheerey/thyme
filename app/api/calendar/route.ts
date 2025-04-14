@@ -2,12 +2,12 @@ import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { businesses, events } from "@/db/schema";
+import { businesses, events, clients } from "@/db/schema";
 import { headers } from "next/headers";
 /**
  * Get all events for a business
  * @param request
- * @returns all events for a business and the business
+ * @returns all clients and events for a business
  */
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -24,10 +24,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Business not found" }, { status: 404 });
   }
 
+  const allClients = await db.query.clients.findMany({
+    where: eq(clients.businessId, business.id),
+  });
+
   const allEvents = await db.query.events.findMany({
     where: eq(events.businessId, business.id),
   });
-  return NextResponse.json({ business, events: allEvents });
+  return NextResponse.json({
+    business,
+    events: allEvents,
+    clients: allClients,
+  });
 }
 
 /**

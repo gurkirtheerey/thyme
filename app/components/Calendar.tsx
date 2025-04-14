@@ -14,6 +14,11 @@ import {
   Checkbox,
   Textarea,
   DialogDescription,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -24,17 +29,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/schema/createEventSchema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
+import { Client, Event } from "@/db/schema";
 const localizer = momentLocalizer(moment);
 
 const MyCalendar = ({
   events,
   businessId,
   userId,
+  clients,
 }: {
-  events: any[];
+  events: Event[];
   businessId: string;
   userId: string;
+  clients: Client[];
 }) => {
   const queryClient = useQueryClient();
   const form = useForm<CreateEventSchema>({
@@ -84,7 +91,11 @@ const MyCalendar = ({
   });
 
   const onSubmit = (data: CreateEventSchema) =>
-    handleAddEvent.mutate({ ...data, businessId: businessId });
+    handleAddEvent.mutate({
+      ...data,
+      businessId: businessId,
+      clientId: data.clientId,
+    });
 
   return (
     <div>
@@ -111,6 +122,28 @@ const MyCalendar = ({
             </DialogDescription>
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="client">Client</Label>
+                <Select
+                  onValueChange={(value) => form.setValue("clientId", value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.clientId && (
+                  <p className="text-red-500 text-sm font-bold">
+                    {form.formState.errors.clientId.message}
+                  </p>
+                )}
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
                 <Input

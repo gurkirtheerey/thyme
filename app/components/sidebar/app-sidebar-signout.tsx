@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { LogOut } from "lucide-react";
 const AppSidebarSignout = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +25,7 @@ const AppSidebarSignout = () => {
 
   return (
     <DropdownMenuItem onClick={handleSignOut}>
+      <LogOut className="w-4 h-4" />
       <span>Sign out</span>
     </DropdownMenuItem>
   );

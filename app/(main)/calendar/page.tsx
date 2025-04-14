@@ -34,13 +34,14 @@ const CalendarPage = () => {
     return <div>Error</div>;
   }
 
-  const { business, events } = data;
+  const { business, events, clients } = data;
 
   return (
     <Calendar
       events={events}
       businessId={business.id}
       userId={session.user.id}
+      clients={clients}
     />
   );
 };

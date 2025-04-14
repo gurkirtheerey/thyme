@@ -1,5 +1,6 @@
 import { pgTable, uuid, text, timestamp, boolean } from "drizzle-orm/pg-core";
 import { businesses } from "./businesses";
+import { clients } from "./clients";
 
 export const events = pgTable("events", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -11,6 +12,9 @@ export const events = pgTable("events", {
   businessId: uuid("business_id")
     .notNull()
     .references(() => businesses.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
