@@ -23,6 +23,7 @@ import { CreateEventSchema } from "@/schema/createEventSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/schema/createEventSchema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const localizer = momentLocalizer(moment);
 
@@ -44,12 +45,27 @@ const MyCalendar = ({
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   const handleAddEvent = useMutation({
-    mutationFn: async (event: CreateEventSchema) => {
+    mutationFn: async (event: CreateEventSchema & { businessId: string }) => {
       const res = await fetch("/api/calendar", {
         method: "POST",
         body: JSON.stringify(event),
       });
       queryClient.invalidateQueries({ queryKey: ["calendar", userId] });
+      toast.success("Event created");
+      setShowModal(false);
+      return res.json();
+    },
+  });
+
+  const handleDeleteEvent = useMutation({
+    mutationFn: async (event: { id: string; businessId: string }) => {
+      const res = await fetch("/api/calendar", {
+        method: "DELETE",
+        body: JSON.stringify(event),
+      });
+      queryClient.invalidateQueries({ queryKey: ["calendar", userId] });
+      setShowEditModal(false);
+      toast.success("Event deleted");
       return res.json();
     },
   });
@@ -66,7 +82,13 @@ const MyCalendar = ({
         </Button>
       </div>
       {showModal && (
-        <Dialog open={showModal} onOpenChange={() => setShowModal(false)}>
+        <Dialog
+          open={showModal}
+          onOpenChange={() => {
+            setShowModal(false);
+            form.reset();
+          }}
+        >
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Add Event</DialogTitle>
@@ -115,6 +137,11 @@ const MyCalendar = ({
                 </div>
                 <Button type="submit">Create Event</Button>
               </div>
+              {form.formState.errors.end && (
+                <p className="text-red-500 text-sm text-center font-bold">
+                  {form.formState.errors.end.message}
+                </p>
+              )}
             </form>
           </DialogContent>
         </Dialog>
@@ -142,15 +169,14 @@ const MyCalendar = ({
           open={showEditModal}
           onOpenChange={() => {
             setShowEditModal(false);
-            form.reset();
           }}
         >
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Delete Event?</DialogTitle>
             </DialogHeader>
-            <DialogDescription className="font-medium text-xl text-black">
-              {selectedEvent.title}
+            <DialogDescription className="font-bold text-md text-black">
+              "{selectedEvent.title}"
             </DialogDescription>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
@@ -170,6 +196,12 @@ const MyCalendar = ({
                 <Textarea id="notes" value={selectedEvent.notes} disabled />
               </div>
               <Button
+                onClick={() =>
+                  handleDeleteEvent.mutate({
+                    id: selectedEvent.id,
+                    businessId: businessId,
+                  })
+                }
                 type="submit"
                 variant="destructive"
                 className="justify-self-end flex"
