@@ -22,36 +22,20 @@ import { DateTimePicker } from "./DateTimePicker";
 import { CreateEventSchema } from "@/schema/createEventSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEventSchema } from "@/schema/createEventSchema";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const localizer = momentLocalizer(moment);
 
-const events = [
-  {
-    allDay: false,
-    title: "Lawn Mowing - John D.",
-    start: new Date("2025-04-14T09:00:00"),
-    end: new Date("2025-04-14T10:00:00"),
-    notes:
-      "client name - John Doe, address - 123 Main St, service type - Lawn Mowing",
-  },
-  {
-    allDay: false,
-    title: "Gutter Cleaning - Sarah K.",
-    start: new Date("2025-04-14T12:30:00"),
-    end: new Date("2025-04-14T01:30:00"),
-    notes:
-      "client name - Sarah King, address - 456 Oak Rd, service type - Gutter Cleaning",
-  },
-  {
-    allDay: true,
-    title: "Unavailable - Personal Day",
-    start: new Date("2025-04-16"),
-    end: new Date("2025-04-16"),
-    notes: "Taking a day off",
-  },
-];
-
-const MyCalendar = () => {
+const MyCalendar = ({
+  events,
+  businessId,
+  userId,
+}: {
+  events: any[];
+  businessId: string;
+  userId: string;
+}) => {
+  const queryClient = useQueryClient();
   const form = useForm<CreateEventSchema>({
     resolver: zodResolver(createEventSchema),
   });
@@ -59,9 +43,19 @@ const MyCalendar = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
-  const handleAddEvent = (event: any) => {
-    console.log(event);
-  };
+  const handleAddEvent = useMutation({
+    mutationFn: async (event: CreateEventSchema) => {
+      const res = await fetch("/api/calendar", {
+        method: "POST",
+        body: JSON.stringify(event),
+      });
+      queryClient.invalidateQueries({ queryKey: ["calendar", userId] });
+      return res.json();
+    },
+  });
+
+  const onSubmit = (data: CreateEventSchema) =>
+    handleAddEvent.mutate({ ...data, businessId: businessId });
 
   return (
     <div>
@@ -77,10 +71,11 @@ const MyCalendar = () => {
             <DialogHeader>
               <DialogTitle>Add Event</DialogTitle>
             </DialogHeader>
-            <form
-              onSubmit={form.handleSubmit(handleAddEvent)}
-              className="space-y-4"
-            >
+            <DialogDescription>
+              Event will be added to the calendar for the business you are
+            </DialogDescription>
+
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
                 <Input id="title" {...form.register("title")} required />
@@ -157,10 +152,7 @@ const MyCalendar = () => {
             <DialogDescription className="font-medium text-xl text-black">
               {selectedEvent.title}
             </DialogDescription>
-            <form
-              onSubmit={form.handleSubmit(handleAddEvent)}
-              className="space-y-4"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="start">Start</Label>
                 <Input

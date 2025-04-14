@@ -6,6 +6,7 @@ export const createEventSchema = z.object({
   end: z.date(),
   notes: z.string().optional(),
   allDay: z.boolean().optional(),
+  businessId: z.string().min(1, "Business ID is required"),
 });
 
 export type CreateEventSchema = z.infer<typeof createEventSchema>;
