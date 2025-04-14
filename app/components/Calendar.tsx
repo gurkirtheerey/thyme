@@ -113,7 +113,12 @@ const MyCalendar = ({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" {...form.register("title")} required />
+                <Input
+                  id="title"
+                  {...form.register("title")}
+                  required
+                  disabled={handleAddEvent.isPending}
+                />
                 {form.formState.errors.title && (
                   <p className="text-red-500 text-sm font-bold">
                     {form.formState.errors.title.message}
@@ -122,15 +127,27 @@ const MyCalendar = ({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="start">Start</Label>
-                <DateTimePicker name="start" control={form.control} />
+                <DateTimePicker
+                  name="start"
+                  control={form.control}
+                  disabled={handleAddEvent.isPending}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="end">End</Label>
-                <DateTimePicker name="end" control={form.control} />
+                <DateTimePicker
+                  name="end"
+                  control={form.control}
+                  disabled={handleAddEvent.isPending}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" {...form.register("notes")} />
+                <Textarea
+                  id="notes"
+                  {...form.register("notes")}
+                  disabled={handleAddEvent.isPending}
+                />
               </div>
               <div className="flex justify-between">
                 <div className="flex items-center gap-2">
@@ -143,12 +160,15 @@ const MyCalendar = ({
                         id="allDay"
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={handleAddEvent.isPending}
                       />
                     )}
                   />
                   <Label htmlFor="allDay">All Day</Label>
                 </div>
-                <Button type="submit">Create Event</Button>
+                <Button type="submit" disabled={handleAddEvent.isPending}>
+                  {handleAddEvent.isPending ? "Creating..." : "Create Event"}
+                </Button>
               </div>
               {form.formState.errors.end && (
                 <p className="text-red-500 text-sm text-center font-bold">

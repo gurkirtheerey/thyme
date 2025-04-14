@@ -20,12 +20,13 @@ interface DateTimePickerProps<
 > {
   name: TName;
   control: Control<TFieldValues>;
+  disabled?: boolean;
 }
 
 export function DateTimePicker<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
->({ name, control }: DateTimePickerProps<TFieldValues, TName>) {
+>({ name, control, disabled }: DateTimePickerProps<TFieldValues, TName>) {
   return (
     <Controller
       name={name}
@@ -34,6 +35,7 @@ export function DateTimePicker<
         <DateTimePickerContent
           date={field.value}
           setDate={(date) => field.onChange(date)}
+          disabled={disabled}
         />
       )}
     />
@@ -43,9 +45,14 @@ export function DateTimePicker<
 interface DateTimePickerContentProps {
   date: Date;
   setDate: (date: Date) => void;
+  disabled?: boolean;
 }
 
-function DateTimePickerContent({ date, setDate }: DateTimePickerContentProps) {
+function DateTimePickerContent({
+  date,
+  setDate,
+  disabled,
+}: DateTimePickerContentProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -81,6 +88,7 @@ function DateTimePickerContent({ date, setDate }: DateTimePickerContentProps) {
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          disabled={disabled}
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",
