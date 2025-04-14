@@ -46,14 +46,27 @@ const MyCalendar = ({
 
   const handleAddEvent = useMutation({
     mutationFn: async (event: CreateEventSchema & { businessId: string }) => {
-      const res = await fetch("/api/calendar", {
-        method: "POST",
-        body: JSON.stringify(event),
-      });
-      queryClient.invalidateQueries({ queryKey: ["calendar", userId] });
-      toast.success("Event created");
-      setShowModal(false);
-      return res.json();
+      try {
+        const res = await fetch("/api/calendar", {
+          method: "POST",
+          body: JSON.stringify(event),
+        });
+        if (!res.ok) {
+          const { error } = await res.json();
+          toast.error("Error creating event", {
+            description: error,
+          });
+          return;
+        }
+        queryClient.invalidateQueries({ queryKey: ["calendar", userId] });
+        toast.success("Event created");
+        setShowModal(false);
+        return res.json();
+      } catch (error) {
+        toast.error("Error creating event", {
+          description: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
     },
   });
 

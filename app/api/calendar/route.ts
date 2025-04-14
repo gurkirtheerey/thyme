@@ -54,6 +54,42 @@ export async function POST(request: NextRequest) {
       end: body.end ? new Date(body.end) : undefined,
     };
 
+    // Get the business ID from the request body
+    const { businessId, start, end } = eventData;
+
+    if (!businessId) {
+      return NextResponse.json(
+        { error: "Business ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if there are any events that overlap with the new event's time range
+    const overlappingEvents = await db.query.events.findMany({
+      where: (eventTable, { and, eq, or, gte, lte }) => {
+        return and(
+          eq(eventTable.businessId, businessId),
+          or(
+            // New event starts during an existing event
+            and(gte(eventTable.start, start), lte(eventTable.start, end)),
+            // New event ends during an existing event
+            and(gte(eventTable.end, start), lte(eventTable.end, end)),
+            // New event completely contains an existing event
+            and(lte(eventTable.start, start), gte(eventTable.end, end)),
+            // New event is completely within an existing event
+            and(gte(eventTable.start, start), lte(eventTable.end, end))
+          )
+        );
+      },
+    });
+
+    if (overlappingEvents.length > 0) {
+      return NextResponse.json(
+        { error: "There is already an event scheduled during this time" },
+        { status: 409 }
+      );
+    }
+
     const event = await db.insert(events).values(eventData);
     return NextResponse.json({ event });
   } catch (error) {
