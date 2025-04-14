@@ -39,15 +39,15 @@ export const ClientDialog = ({
     },
   });
 
-  const handleCreateClient = useMutation({
-    mutationFn: async (client: Client) => {
-      const response = await fetch("/api/clients", {
-        method: "POST",
-        body: JSON.stringify(client),
-      });
-      return response.json();
-    },
-  });
+  // const handleCreateClient = useMutation({
+  //   mutationFn: async (client: Client) => {
+  //     const response = await fetch("/api/clients", {
+  //       method: "POST",
+  //       body: JSON.stringify(client),
+  //     });
+  //     return response.json();
+  //   },
+  // });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
