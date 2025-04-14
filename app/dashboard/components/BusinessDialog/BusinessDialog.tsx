@@ -3,6 +3,7 @@ import { Business, ServiceCatalog } from "@/db/schema";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useEffect } from "react";
 import {
   Button,
   Label,
@@ -29,7 +30,7 @@ export function BusinessDialog({
   dialogOpen,
   setDialogOpen,
 }: {
-  business: Business;
+  business: Business | null;
   dialogOpen: boolean;
   setDialogOpen: (open: boolean) => void;
 }) {
@@ -37,8 +38,22 @@ export function BusinessDialog({
   const { data: session } = authClient.useSession();
 
   const form = useForm<Business>({
-    defaultValues: business,
+    defaultValues: {
+      name: "",
+      description: "",
+      address: "",
+      phone: "",
+      website: "",
+      serviceCatalogId: "",
+    },
   });
+
+  // Reset form when business changes
+  useEffect(() => {
+    if (business) {
+      form.reset(business);
+    }
+  }, [business, form]);
 
   const { data: services } = useQuery({
     queryKey: ["services"],
@@ -79,10 +94,12 @@ export function BusinessDialog({
 
   const handleUpdateBusiness = useMutation({
     mutationFn: async (data: Business) => {
-      await fetch(`/api/businesses/${business.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
+      if (business) {
+        await fetch(`/api/businesses/${business.id}`, {
+          method: "PUT",
+          body: JSON.stringify(data),
+        });
+      }
       // await fetch(`/api/services/${business.id}`, {
       //   method: "PUT",
       //   body: JSON.stringify({
@@ -114,9 +131,7 @@ export function BusinessDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          {business ? "Update Business" : "Create Business"}
-        </Button>
+        <Button>{business ? "Update" : "Create Business"}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

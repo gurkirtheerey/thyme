@@ -6,3 +6,5 @@ export * from "./select";
 export * from "./form";
 export * from "./card";
 export * from "./skeleton";
+export * from "./sidebar";
+export * from "./dropdown-menu";
