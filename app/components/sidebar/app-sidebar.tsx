@@ -75,8 +75,6 @@ export async function AppSidebar() {
     where: eq(user.email, session.user.email),
   });
 
-  console.log(user2);
-
   if (!user2) {
     return null;
   }

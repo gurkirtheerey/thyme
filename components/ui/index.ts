@@ -9,3 +9,8 @@ export * from "./skeleton";
 export * from "./sidebar";
 export * from "./dropdown-menu";
 export * from "./table";
+export * from "./checkbox";
+export * from "./calendar";
+export * from "./popover";
+export * from "./scroll-area";
+export * from "./textarea";
