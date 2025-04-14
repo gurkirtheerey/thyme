@@ -238,8 +238,9 @@ const MyCalendar = ({
                 type="submit"
                 variant="destructive"
                 className="justify-self-end flex"
+                disabled={handleDeleteEvent.isPending}
               >
-                Delete
+                {handleDeleteEvent.isPending ? "Deleting..." : "Delete"}
               </Button>
             </form>
           </DialogContent>
