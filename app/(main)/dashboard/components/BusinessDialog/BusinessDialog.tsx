@@ -74,7 +74,6 @@ export function BusinessDialog({
         body: JSON.stringify(data),
       });
       const businessData = await businessResponse.json();
-      console.log(businessData);
       await fetch("/api/services", {
         method: "POST",
         body: JSON.stringify({

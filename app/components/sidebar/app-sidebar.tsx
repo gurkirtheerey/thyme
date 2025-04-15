@@ -5,6 +5,7 @@ import {
   Settings,
   User2,
   Users,
+  UserRound,
 } from "lucide-react";
 
 import {
@@ -22,6 +23,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -75,8 +77,6 @@ export async function AppSidebar() {
     where: eq(user.email, session.user.email),
   });
 
-  console.log(user2);
-
   if (!user2) {
     return null;
   }
@@ -108,13 +108,19 @@ export async function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
+              <DropdownMenuTrigger asChild className="w-full">
+                <SidebarMenuButton className="w-full">
                   <User2 /> {session.user.email}
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top">
+              <DropdownMenuContent side="top" className="w-[220px]">
+                <Link href="/profile">
+                  <DropdownMenuItem>
+                    <UserRound />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                </Link>
                 <AppSidebarSignout />
               </DropdownMenuContent>
             </DropdownMenu>
